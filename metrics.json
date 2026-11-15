@@ -1,0 +1,1070 @@
+{
+  "about": "Train and *honestly* evaluate the experimental ML component.\n\nWhat the model does: a Random Forest re-predicts the final-answer category (correct / wrong_status /\nwrong_value / suboptimal_solution / infeasible_solution / missed_multiple_optima) from 28 numeric features.\nThose features are computed from MathGuard's exact solver, and the training labels come from the\ndeterministic rule judge (features.judge).  The model therefore learns to imitate rules that are already\nexact, so near-perfect agreement on generated data is expected *by construction* and is not evidence of\nreal-world generalisation.\n\nHow it is evaluated here:\n1. Synthetic problems are split by problem (60 % train / 20 % validation / 20 % test); no problem appears\n   in two splits.  The validation split chooses the tree depth.\n2. The 20 solve-and-verify problems of the original dataset are never used for training; they form a\n   second test set (answers generated, labels from the rules).\n3. data/independent_eval.jsonl contains hand-written answers in styles the generator never produces, with\n   *manually assigned* labels.  This is the only test whose labels are independent of the rules.\n4. Every metric is reported for the ML model AND for the rule-based verifier on the same data, so the\n   ML model's added value (if any) is visible.\n5. The step-level verifier is evaluated separately on data/mathguard_extended_dataset.jsonl, whose labels\n   are the mistakes deliberately injected by the generator (independent of the verifier's logic).\n\nRun from the project root:   python -m backend.train",
+  "splits": {
+    "train_problems": 894,
+    "validation_problems": 298,
+    "test_problems": 298,
+    "train_rows": 3527,
+    "validation_rows": 1178,
+    "test_rows": 1177
+  },
+  "chosen_max_depth": null,
+  "heldout_synthetic": {
+    "ml": {
+      "n": 1177,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 454
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 318
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 190
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 115
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 90
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 10
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            454,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            318,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            190,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            115,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            90,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            10
+          ]
+        ]
+      }
+    },
+    "rules": {
+      "n": 1177,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 454
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 318
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 190
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 115
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 90
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 10
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            454,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            318,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            190,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            115,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            90,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            10
+          ]
+        ]
+      }
+    },
+    "label_counts": {
+      "suboptimal_solution": 115,
+      "correct": 454,
+      "wrong_value": 190,
+      "wrong_status": 318,
+      "infeasible_solution": 90,
+      "missed_multiple_optima": 10
+    }
+  },
+  "dataset_problems_unseen": {
+    "ml": {
+      "n": 598,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 218
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 86
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 136
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 93
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 59
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 6
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            218,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            86,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            136,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            93,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            59,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            6
+          ]
+        ]
+      }
+    },
+    "rules": {
+      "n": 598,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 218
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 86
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 136
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 93
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 59
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 6
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            218,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            86,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            136,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            93,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            59,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            6
+          ]
+        ]
+      }
+    },
+    "label_counts": {
+      "suboptimal_solution": 93,
+      "correct": 218,
+      "wrong_value": 136,
+      "infeasible_solution": 59,
+      "wrong_status": 86,
+      "missed_multiple_optima": 6
+    }
+  },
+  "independent_hand_labelled": {
+    "ml": {
+      "n": 50,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 23
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 6
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 6
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 7
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 5
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 3
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            23,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            6,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            7,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            5,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "rules": {
+      "n": 50,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 23
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 6
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 6
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 7
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 5
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 3
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            23,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            6,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            6,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            7,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            5,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            3
+          ]
+        ]
+      }
+    },
+    "label_counts": {
+      "correct": 23,
+      "wrong_value": 6,
+      "suboptimal_solution": 7,
+      "infeasible_solution": 5,
+      "wrong_status": 6,
+      "missed_multiple_optima": 3
+    }
+  },
+  "independent_hand_labelled_note": "Used during development: it exposed 3 answer-parser bugs (fixed) and 2 hand-labelling slips (corrected). Agreement before those fixes was 45/50.",
+  "untouched_holdout": {
+    "ml": {
+      "n": 20,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 10
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 4
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            10,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "rules": {
+      "n": 20,
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "per_class": {
+        "correct": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 10
+        },
+        "wrong_status": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2
+        },
+        "wrong_value": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 2
+        },
+        "suboptimal_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 4
+        },
+        "infeasible_solution": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1
+        },
+        "missed_multiple_optima": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 1
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "correct",
+          "wrong_status",
+          "wrong_value",
+          "suboptimal_solution",
+          "infeasible_solution",
+          "missed_multiple_optima"
+        ],
+        "matrix": [
+          [
+            10,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            4,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    "label_counts": {
+      "correct": 10,
+      "suboptimal_solution": 4,
+      "wrong_value": 2,
+      "infeasible_solution": 1,
+      "wrong_status": 2,
+      "missed_multiple_optima": 1
+    }
+  },
+  "untouched_holdout_note": "Written after development ended and evaluated once; no code was changed afterwards.",
+  "step_verifier": {
+    "n": 427,
+    "error_detection": {
+      "tp": 348,
+      "fp": 0,
+      "fn": 0,
+      "tn": 79,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "by_injected_mistake": {
+      "none": {
+        "n": 46,
+        "detected": 0,
+        "exact_code": 0,
+        "false_alarm": 0
+      },
+      "entering_not_best": {
+        "n": 33,
+        "detected": 0,
+        "exact_code": 0,
+        "false_alarm": 0
+      },
+      "entering_bad": {
+        "n": 30,
+        "detected": 30,
+        "exact_code": 30,
+        "false_alarm": 0
+      },
+      "leaving_bad": {
+        "n": 33,
+        "detected": 33,
+        "exact_code": 33,
+        "false_alarm": 0
+      },
+      "ratio_text": {
+        "n": 36,
+        "detected": 36,
+        "exact_code": 36,
+        "false_alarm": 0
+      },
+      "pivot_claim": {
+        "n": 36,
+        "detected": 36,
+        "exact_code": 36,
+        "false_alarm": 0
+      },
+      "rowop_cell": {
+        "n": 33,
+        "detected": 33,
+        "exact_code": 33,
+        "false_alarm": 0
+      },
+      "zj_cell": {
+        "n": 36,
+        "detected": 36,
+        "exact_code": 36,
+        "false_alarm": 0
+      },
+      "premature_stop": {
+        "n": 36,
+        "detected": 36,
+        "exact_code": 36,
+        "false_alarm": 0
+      },
+      "wrong_value": {
+        "n": 33,
+        "detected": 33,
+        "exact_code": 33,
+        "false_alarm": 0
+      },
+      "normalise_rhs": {
+        "n": 21,
+        "detected": 21,
+        "exact_code": 21,
+        "false_alarm": 0
+      },
+      "unique_claim": {
+        "n": 3,
+        "detected": 3,
+        "exact_code": 3,
+        "false_alarm": 0
+      },
+      "intercept": {
+        "n": 10,
+        "detected": 10,
+        "exact_code": 10,
+        "false_alarm": 0
+      },
+      "intersection": {
+        "n": 8,
+        "detected": 8,
+        "exact_code": 8,
+        "false_alarm": 0
+      },
+      "infeasible_corner": {
+        "n": 10,
+        "detected": 10,
+        "exact_code": 10,
+        "false_alarm": 0
+      },
+      "evaluation": {
+        "n": 9,
+        "detected": 9,
+        "exact_code": 9,
+        "false_alarm": 0
+      },
+      "wrong_pick": {
+        "n": 8,
+        "detected": 8,
+        "exact_code": 8,
+        "false_alarm": 0
+      },
+      "missed_corner": {
+        "n": 6,
+        "detected": 6,
+        "exact_code": 6,
+        "false_alarm": 0
+      }
+    },
+    "note": "Labels are the mistakes injected by backend/ai_render.py; the verifier never sees them. 'exact_code' counts cases where the expected error category was reported."
+  },
+  "ml_vs_rules_accuracy_gain_on_independent_set": 0.0,
+  "conclusion": "The ML model does not improve on the deterministic verifier: on the independent hand-labelled answers its accuracy is 1.000 versus 1.000 for the rules. Its labels and features are derived from the same exact solver, so it can at best reproduce the rules. It is therefore kept only as an experimental, clearly labelled opinion and never overrides the mathematical verification.",
+  "top_features": [
+    [
+      "status_ok",
+      0.12420758491459383
+    ],
+    [
+      "sol_gap",
+      0.09589321604771806
+    ],
+    [
+      "sol_viol",
+      0.08894946462269465
+    ],
+    [
+      "sol_feasible",
+      0.08060664152034765
+    ],
+    [
+      "c_unique",
+      0.07613356753506567
+    ],
+    [
+      "val_err_rel",
+      0.07611804762830147
+    ],
+    [
+      "unique_vs_multiple",
+      0.07375895575278307
+    ],
+    [
+      "sol_optimal",
+      0.07116228937873258
+    ],
+    [
+      "sol_match",
+      0.07013790625429055
+    ],
+    [
+      "val_consistent",
+      0.06163623723686307
+    ]
+  ],
+  "classes": [
+    "correct",
+    "infeasible_solution",
+    "missed_multiple_optima",
+    "suboptimal_solution",
+    "wrong_status",
+    "wrong_value"
+  ],
+  "trained_seconds": 12.7
+}

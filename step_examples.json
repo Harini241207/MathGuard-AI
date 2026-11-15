@@ -1,0 +1,182 @@
+[
+ {
+  "label": "Simplex \u00b7 fully correct working (Markdown tables)",
+  "question": "Maximize Z = 3x + 5y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "**Step 1: Convert to standard form**\n\nMaximize Z = 3x + 5y + 0s1 + 0s2 + 0s3\nsubject to\nx + y + s1 = 4\nx + s2 = 2\ny + s3 = 3\n\n**Initial Simplex Tableau**\n\n| Basis | C_B | x | y | s1 | s2 | s3 | RHS | Ratio |\n|---|---|---|---|---|---|---|---|---|\n| s1 | 0 | 1 | 1 | 1 | 0 | 0 | 4 | 4/1 = 4 |\n| s2 | 0 | 1 | 0 | 0 | 1 | 0 | 2 | \u2014 |\n| s3 | 0 | 0 | 1 | 0 | 0 | 1 | 3 | 3/1 = 3 |\n| Z_j | | 0 | 0 | 0 | 0 | 0 | 0 | |\n| C_j \u2212 Z_j | | 3 | 5 | 0 | 0 | 0 | | |\n\nThe most positive Cj \u2212 Zj is 5, so **y is the entering variable**. The minimum ratio is 3, so **s3 is the leaving variable**. Pivot element = 1.\n\nRow operations: R3 \u2192 R3, R1 \u2192 R1 \u2212 R3.\n\n**Iteration 1**\n\n| Basis | C_B | x | y | s1 | s2 | s3 | RHS | Ratio |\n|---|---|---|---|---|---|---|---|---|\n| s1 | 0 | 1 | 0 | 1 | 0 | -1 | 1 | 1 |\n| s2 | 0 | 1 | 0 | 0 | 1 | 0 | 2 | 2 |\n| y | 5 | 0 | 1 | 0 | 0 | 1 | 3 | \u2014 |\n| Z_j | | 0 | 5 | 0 | 0 | 5 | 15 | |\n| C_j \u2212 Z_j | | 3 | 0 | 0 | 0 | -5 | | |\n\nx enters (Cj \u2212 Zj = 3) and s1 leaves (minimum ratio 1). Pivot element = 1.\nR2 \u2192 R2 \u2212 R1\n\n**Iteration 2**\n\n| Basis | C_B | x | y | s1 | s2 | s3 | RHS |\n|---|---|---|---|---|---|---|---|\n| x | 3 | 1 | 0 | 1 | 0 | -1 | 1 |\n| s2 | 0 | 0 | 0 | -1 | 1 | 1 | 1 |\n| y | 5 | 0 | 1 | 0 | 0 | 1 | 3 |\n| Z_j | | 3 | 5 | 3 | 0 | 2 | 18 |\n| C_j \u2212 Z_j | | 0 | 0 | -3 | 0 | -2 | |\n\nAll Cj \u2212 Zj \u2264 0, so the optimal solution is reached.\n\n**Final answer:** x = 1, y = 3, maximum Z = 18.\n",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Correct: every tableau, ratio, pivot and the final answer are right.",
+  "source": "ChatGPT",
+  "expected": "correct"
+ },
+ {
+  "label": "Simplex \u00b7 row-operation slip in iteration 2",
+  "question": "Maximize Z = 3x + 5y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "**Step 1: Convert to standard form**\n\nMaximize Z = 3x + 5y + 0s1 + 0s2 + 0s3\nsubject to\nx + y + s1 = 4\nx + s2 = 2\ny + s3 = 3\n\n**Initial Simplex Tableau**\n\n| Basis | C_B | x | y | s1 | s2 | s3 | RHS | Ratio |\n|---|---|---|---|---|---|---|---|---|\n| s1 | 0 | 1 | 1 | 1 | 0 | 0 | 4 | 4/1 = 4 |\n| s2 | 0 | 1 | 0 | 0 | 1 | 0 | 2 | \u2014 |\n| s3 | 0 | 0 | 1 | 0 | 0 | 1 | 3 | 3/1 = 3 |\n| Z_j | | 0 | 0 | 0 | 0 | 0 | 0 | |\n| C_j \u2212 Z_j | | 3 | 5 | 0 | 0 | 0 | | |\n\nThe most positive Cj \u2212 Zj is 5, so **y is the entering variable**. The minimum ratio is 3, so **s3 is the leaving variable**. Pivot element = 1.\n\nRow operations: R3 \u2192 R3, R1 \u2192 R1 \u2212 R3.\n\n**Iteration 1**\n\n| Basis | C_B | x | y | s1 | s2 | s3 | RHS | Ratio |\n|---|---|---|---|---|---|---|---|---|\n| s1 | 0 | 1 | 0 | 1 | 0 | -1 | 1 | 1 |\n| s2 | 0 | 1 | 0 | 0 | 1 | 0 | 2 | 2 |\n| y | 5 | 0 | 1 | 0 | 0 | 1 | 3 | \u2014 |\n| Z_j | | 0 | 5 | 0 | 0 | 5 | 15 | |\n| C_j \u2212 Z_j | | 3 | 0 | 0 | 0 | -5 | | |\n\nx enters (Cj \u2212 Zj = 3) and s1 leaves (minimum ratio 1). Pivot element = 1.\nR2 \u2192 R2 \u2212 R1\n\n**Iteration 2**\n\n| Basis | C_B | x | y | s1 | s2 | s3 | RHS |\n|---|---|---|---|---|---|---|---|\n| x | 3 | 1 | 0 | 1 | 0 | -1 | 1 |\n| s2 | 0 | 0 | 0 | -1 | 1 | 1 | 3 |\n| y | 5 | 0 | 1 | 0 | 0 | 1 | 3 |\n| Z_j | | 3 | 5 | 3 | 0 | 2 | 18 |\n| C_j \u2212 Z_j | | 0 | 0 | -3 | 0 | -2 | |\n\nAll Cj \u2212 Zj \u2264 0, so the optimal solution is reached.\n\n**Final answer:** x = 1, y = 3, maximum Z = 18.\n",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Contains a mistake: one RHS entry is computed wrongly; the final answer is still right.",
+  "source": "Gemini",
+  "expected": "invalid"
+ },
+ {
+  "label": "Simplex \u00b7 valid but non-textbook entering choice",
+  "question": "Maximize Z = 3x + 5y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "Initial tableau:\n\n| Basis | CB | x | y | s1 | s2 | s3 | RHS |\n|---|---|---|---|---|---|---|---|\n| s1 | 0 | 1 | 1 | 1 | 0 | 0 | 4 |\n| s2 | 0 | 1 | 0 | 0 | 1 | 0 | 2 |\n| s3 | 0 | 0 | 1 | 0 | 0 | 1 | 3 |\n| Cj-Zj | | 3 | 5 | 0 | 0 | 0 | |\n\nEntering variable: x. Ratios: s1: 4/1 = 4, s2: 2/1 = 2. Leaving variable: s2.\n\n| Basis | CB | x | y | s1 | s2 | s3 | RHS |\n|---|---|---|---|---|---|---|---|\n| s1 | 0 | 0 | 1 | 1 | -1 | 0 | 2 |\n| x | 3 | 1 | 0 | 0 | 1 | 0 | 2 |\n| s3 | 0 | 0 | 1 | 0 | 0 | 1 | 3 |\n| Cj-Zj | | 0 | 5 | 0 | -3 | 0 | |\n\nEntering variable: y. Leaving variable: s1 (ratio 2/1 = 2).\n\n| Basis | CB | x | y | s1 | s2 | s3 | RHS |\n|---|---|---|---|---|---|---|---|\n| y | 5 | 0 | 1 | 1 | -1 | 0 | 2 |\n| x | 3 | 1 | 0 | 0 | 1 | 0 | 2 |\n| s3 | 0 | 0 | 0 | -1 | 1 | 1 | 1 |\n| Cj-Zj | | 0 | 0 | -5 | 2 | 0 | |\n\nEntering variable: s2. Leaving variable: s3.\n\n| Basis | CB | x | y | s1 | s2 | s3 | RHS |\n|---|---|---|---|---|---|---|---|\n| y | 5 | 0 | 1 | 0 | 0 | 1 | 3 |\n| x | 3 | 1 | 0 | 1 | 0 | -1 | 1 |\n| s2 | 0 | 0 | 0 | -1 | 1 | 1 | 1 |\n| Cj-Zj | | 0 | 0 | -3 | 0 | -2 | |\n\nOptimal: x = 1, y = 3, Z = 18.\n",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Correct result via a different valid path (x enters before y).",
+  "source": "Claude",
+  "expected": "correct"
+ },
+ {
+  "label": "Simplex \u00b7 LaTeX array tableaus",
+  "question": "Maximize Z = 3x + 5y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "We introduce slack variables $s_1, s_2, s_3$.\n\n$$\n\\begin{array}{c|c|ccccc|c}\n\\text{Basis} & C_B & x & y & s_1 & s_2 & s_3 & \\text{RHS} \\\\ \\hline\ns_1 & 0 & 1 & 1 & 1 & 0 & 0 & 4 \\\\\ns_2 & 0 & 1 & 0 & 0 & 1 & 0 & 2 \\\\\ns_3 & 0 & 0 & 1 & 0 & 0 & 1 & 3 \\\\ \\hline\nC_j - Z_j & & 3 & 5 & 0 & 0 & 0 & \n\\end{array}\n$$\n\n$y$ enters, $s_3$ leaves (ratios $4/1 = 4$ and $3/1 = 3$), pivot element $= 1$.\n\n$$\n\\begin{array}{c|c|ccccc|c}\n\\text{Basis} & C_B & x & y & s_1 & s_2 & s_3 & \\text{RHS} \\\\ \\hline\ns_1 & 0 & 1 & 0 & 1 & 0 & -1 & 1 \\\\\ns_2 & 0 & 1 & 0 & 0 & 1 & 0 & 2 \\\\\ny & 5 & 0 & 1 & 0 & 0 & 1 & 3 \\\\ \\hline\nC_j - Z_j & & 3 & 0 & 0 & 0 & -5 &\n\\end{array}\n$$\n\n$x$ enters and $s_1$ leaves.\n\n$$\n\\begin{array}{c|c|ccccc|c}\n\\text{Basis} & C_B & x & y & s_1 & s_2 & s_3 & \\text{RHS} \\\\ \\hline\nx & 3 & 1 & 0 & 1 & 0 & -1 & 1 \\\\\ns_2 & 0 & 0 & 0 & -1 & 1 & 1 & 1 \\\\\ny & 5 & 0 & 1 & 0 & 0 & 1 & 3 \\\\ \\hline\nC_j - Z_j & & 0 & 0 & -3 & 0 & -2 &\n\\end{array}\n$$\n\nAll $C_j - Z_j \\le 0$, so the solution is optimal: $x = 1$, $y = 3$, $Z_{max} = 18$.\n",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Correct working written in LaTeX.",
+  "source": "Claude",
+  "expected": "correct"
+ },
+ {
+  "label": "Simplex \u00b7 stops too early (premature termination)",
+  "question": "Maximize Z = 3x + 5y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "Initial tableau:\n\n| Basis | CB | x | y | s1 | s2 | s3 | RHS |\n|---|---|---|---|---|---|---|---|\n| s1 | 0 | 1 | 1 | 1 | 0 | 0 | 4 |\n| s2 | 0 | 1 | 0 | 0 | 1 | 0 | 2 |\n| s3 | 0 | 0 | 1 | 0 | 0 | 1 | 3 |\n| Cj - Zj | | 3 | 5 | 0 | 0 | 0 | |\n\nThe current solution is optimal: x = 0, y = 0, Z = 0.\n",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Contains a mistake: declares optimality while a positive Cj - Zj remains.",
+  "source": "Other",
+  "expected": "invalid"
+ },
+ {
+  "label": "Simplex \u00b7 misses unboundedness",
+  "question": "Maximize Z = 3x + 2y subject to x - y <= 1, x, y >= 0",
+  "answer": "| Basis | CB | x | y | s1 | RHS |\n|---|---|---|---|---|---|\n| s1 | 0 | 1 | -1 | 1 | 1 |\n| Cj - Zj | | 3 | 2 | 0 | |\n\nx enters, s1 leaves.\n\n| Basis | CB | x | y | s1 | RHS |\n|---|---|---|---|---|---|\n| x | 3 | 1 | -1 | 1 | 1 |\n| Cj - Zj | | 0 | 5 | -3 | |\n\nThe optimal solution is x = 1, y = 0 with Z = 3.\n",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Contains a mistake: reports a finite optimum for an unbounded problem.",
+  "source": "ChatGPT",
+  "expected": "invalid"
+ },
+ {
+  "label": "Simplex \u00b7 claims a unique optimum (alternative optima exist)",
+  "question": "Maximize Z = 2x + 4y subject to x + 2y <= 8, x + y <= 6, x, y >= 0",
+  "answer": "| Basis | CB | x | y | s1 | s2 | RHS |\n|---|---|---|---|---|---|---|\n| s1 | 0 | 1 | 2 | 1 | 0 | 8 |\n| s2 | 0 | 1 | 1 | 0 | 1 | 6 |\n| Cj - Zj | | 2 | 4 | 0 | 0 | |\n\ny enters, s1 leaves.\n\n| Basis | CB | x | y | s1 | s2 | RHS |\n|---|---|---|---|---|---|---|\n| y | 4 | 1/2 | 1 | 1/2 | 0 | 4 |\n| s2 | 0 | 1/2 | 0 | -1/2 | 1 | 2 |\n| Cj - Zj | | 0 | 0 | -2 | 0 | |\n\nOptimal. The unique optimal solution is x = 0, y = 4, Z = 16.\n",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Contains a mistake: misses the alternative optima.",
+  "source": "Gemini",
+  "expected": "invalid"
+ },
+ {
+  "label": "Simplex \u00b7 only states entering / leaving variables",
+  "question": "Maximize Z = 3x + 5y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "Using the simplex method: initially y enters and s3 leaves. Next x enters and s1 leaves.\nAll net evaluations are now non-positive, so the optimum is x = 1, y = 3 with Z = 18.",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Incomplete working: no tableaus shown.",
+  "source": "Other",
+  "expected": "invalid"
+ },
+ {
+  "label": "Simplex \u00b7 pivot row not normalised (x3..x6 as slacks, decimals)",
+  "question": "Maximize Z = 5x1 + 4x2 subject to 6x1 + 4x2 <= 24, x1 + 2x2 <= 6, -x1 + x2 <= 1, x2 <= 2, x1, x2 >= 0",
+  "answer": "Convert to standard form by adding slack variables:\n6x1 + 4x2 + x3 = 24\nx1 + 2x2 + x4 = 6\n-x1 + x2 + x5 = 1\nx2 + x6 = 2\n\n**Initial simplex tableau**\n\n| Basis | CB | x1 | x2 | x3 | x4 | x5 | x6 | RHS | Ratio |\n|---|---|---|---|---|---|---|---|---|---|\n| x3 | 0 | 6 | 4 | 1 | 0 | 0 | 0 | 24 | 4 |\n| x4 | 0 | 1 | 2 | 0 | 1 | 0 | 0 | 6 | 6 |\n| x5 | 0 | -1 | 1 | 0 | 0 | 1 | 0 | 1 | - |\n| x6 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 2 | - |\n| Zj |  | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  |\n| Cj - Zj |  | 5 | 4 | 0 | 0 | 0 | 0 |  |  |\n\nx1 enters the basis and x3 leaves (minimum ratio). The pivot element is 6.\n\n**Iteration 1**\n\n| Basis | CB | x1 | x2 | x3 | x4 | x5 | x6 | RHS | Ratio |\n|---|---|---|---|---|---|---|---|---|---|\n| x1 | 5 | 1 | 2/3 | 1/6 | 0 | 0 | 0 | 24 | 36 |\n| x4 | 0 | 0 | 4/3 | -1/6 | 1 | 0 | 0 | 2 | 3/2 |\n| x5 | 0 | 0 | 1.67 | 0.17 | 0 | 1 | 0 | 5 | 3 |\n| x6 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 2 | 2 |\n| Zj |  | 5 | 10/3 | 5/6 | 0 | 0 | 0 | 120 |  |\n| Cj - Zj |  | 0 | 2/3 | -5/6 | 0 | 0 | 0 |  |  |\n\nEntering variable: x2. Leaving variable: x4. Pivot element = 4/3.\n\n**Iteration 2**\n\n| Basis | CB | x1 | x2 | x3 | x4 | x5 | x6 | RHS |\n|---|---|---|---|---|---|---|---|---|\n| x1 | 5 | 1 | 0 | 1/4 | -1/2 | 0 | 0 | 23 |\n| x2 | 4 | 0 | 1 | -0.12 | 0.75 | 0 | 0 | 1.50 |\n| x5 | 0 | 0 | 0 | 0.38 | -1.25 | 1 | 0 | 2.50 |\n| x6 | 0 | 0 | 0 | 0.12 | -0.75 | 0 | 1 | 1/2 |\n| Zj |  | 5 | 4 | 3/4 | 1/2 | 0 | 0 | 121 |\n| Cj - Zj |  | 0 | 0 | -3/4 | -1/2 | 0 | 0 |  |\n\nAll Cj - Zj values satisfy the optimality condition, so the current solution is optimal.\n**Final answer:** x1 = 23, x2 = 3/2, maximum Z = 121.",
+  "method": "simplex",
+  "group": "Step-by-step checks",
+  "description": "Contains a mistake: the pivot row's RHS was not divided by the pivot element.",
+  "source": "ChatGPT",
+  "expected": "invalid"
+ },
+ {
+  "label": "Big M \u00b7 correct, with symbolic M",
+  "question": "Minimize Z = 2x + 3y subject to x + y >= 4, x + 2y >= 6, x, y >= 0",
+  "answer": "Standard form: x + y - s1 + A1 = 4, x + 2y - s2 + A2 = 6.\nMinimize Z = 2x + 3y + 0s1 + 0s2 + MA1 + MA2.\n\n| Cj | | 2 | 3 | 0 | 0 | M | M | |\n|---|---|---|---|---|---|---|---|---|\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n| A1 | M | 1 | 1 | -1 | 0 | 1 | 0 | 4 |\n| A2 | M | 1 | 2 | 0 | -1 | 0 | 1 | 6 |\n| Zj | | 2M | 3M | -M | -M | M | M | 10M |\n| Cj - Zj | | 2 - 2M | 3 - 3M | M | M | 0 | 0 | |\n\ny enters (most negative Cj - Zj = 3 - 3M). Ratios: 4/1 = 4, 6/2 = 3, so A2 leaves. Pivot element = 2.\n\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n|---|---|---|---|---|---|---|---|---|\n| A1 | M | 1/2 | 0 | -1 | 1/2 | 1 | -1/2 | 1 |\n| y | 3 | 1/2 | 1 | 0 | -1/2 | 0 | 1/2 | 3 |\n| Zj | | M/2 + 3/2 | 3 | -M | M/2 - 3/2 | M | -M/2 + 3/2 | M + 9 |\n| Cj - Zj | | 1/2 - M/2 | 0 | M | 3/2 - M/2 | 0 | 3M/2 - 3/2 | |\n\nx enters, A1 leaves (ratios 1/(1/2) = 2 and 3/(1/2) = 6). Pivot element = 1/2.\n\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n|---|---|---|---|---|---|---|---|---|\n| x | 2 | 1 | 0 | -2 | 1 | 2 | -1 | 2 |\n| y | 3 | 0 | 1 | 1 | -1 | -1 | 1 | 2 |\n| Zj | | 2 | 3 | -1 | -1 | 1 | 1 | 10 |\n| Cj - Zj | | 0 | 0 | 1 | 1 | M - 1 | M - 1 | |\n\nAll Cj - Zj >= 0, so the solution is optimal: x = 2, y = 2, minimum Z = 10.\n",
+  "method": "bigm",
+  "group": "Step-by-step checks",
+  "description": "Correct Big M working (M kept as a symbol).",
+  "source": "Claude",
+  "expected": "correct"
+ },
+ {
+  "label": "Big M \u00b7 wrong penalty sign",
+  "question": "Minimize Z = 2x + 3y subject to x + y >= 4, x + 2y >= 6, x, y >= 0",
+  "answer": "Standard form: x + y - s1 + A1 = 4, x + 2y - s2 + A2 = 6.\nMinimize Z = 2x + 3y + 0s1 + 0s2 + MA1 + MA2.\n\n| Cj | | 2 | 3 | 0 | 0 | -M | -M | |\n|---|---|---|---|---|---|---|---|---|\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n| A1 | M | 1 | 1 | -1 | 0 | 1 | 0 | 4 |\n| A2 | M | 1 | 2 | 0 | -1 | 0 | 1 | 6 |\n| Zj | | 2M | 3M | -M | -M | M | M | 10M |\n| Cj - Zj | | 2 - 2M | 3 - 3M | M | M | 0 | 0 | |\n\ny enters (most negative Cj - Zj = 3 - 3M). Ratios: 4/1 = 4, 6/2 = 3, so A2 leaves. Pivot element = 2.\n\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n|---|---|---|---|---|---|---|---|---|\n| A1 | M | 1/2 | 0 | -1 | 1/2 | 1 | -1/2 | 1 |\n| y | 3 | 1/2 | 1 | 0 | -1/2 | 0 | 1/2 | 3 |\n| Zj | | M/2 + 3/2 | 3 | -M | M/2 - 3/2 | M | -M/2 + 3/2 | M + 9 |\n| Cj - Zj | | 1/2 - M/2 | 0 | M | 3/2 - M/2 | 0 | 3M/2 - 3/2 | |\n\nx enters, A1 leaves (ratios 1/(1/2) = 2 and 3/(1/2) = 6). Pivot element = 1/2.\n\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n|---|---|---|---|---|---|---|---|---|\n| x | 2 | 1 | 0 | -2 | 1 | 2 | -1 | 2 |\n| y | 3 | 0 | 1 | 1 | -1 | -1 | 1 | 2 |\n| Zj | | 2 | 3 | -1 | -1 | 1 | 1 | 10 |\n| Cj - Zj | | 0 | 0 | 1 | 1 | M - 1 | M - 1 | |\n\nAll Cj - Zj >= 0, so the solution is optimal: x = 2, y = 2, minimum Z = 10.\n",
+  "method": "bigm",
+  "group": "Step-by-step checks",
+  "description": "Contains a mistake: -M used for artificial variables in a minimisation problem.",
+  "source": "Gemini",
+  "expected": "invalid"
+ },
+ {
+  "label": "Two-Phase \u00b7 correct (Phase I minimises W)",
+  "question": "Minimize Z = 2x + 3y subject to x + y >= 4, x + 2y >= 6, x, y >= 0",
+  "answer": "**Phase I**: Minimize W = A1 + A2.\n\n| Cj | | 0 | 0 | 0 | 0 | 1 | 1 | |\n|---|---|---|---|---|---|---|---|---|\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n| A1 | 1 | 1 | 1 | -1 | 0 | 1 | 0 | 4 |\n| A2 | 1 | 1 | 2 | 0 | -1 | 0 | 1 | 6 |\n| Zj | | 2 | 3 | -1 | -1 | 1 | 1 | 10 |\n| Cj - Zj | | -2 | -3 | 1 | 1 | 0 | 0 | |\n\ny enters, A2 leaves.\n\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n|---|---|---|---|---|---|---|---|---|\n| A1 | 1 | 1/2 | 0 | -1 | 1/2 | 1 | -1/2 | 1 |\n| y | 0 | 1/2 | 1 | 0 | -1/2 | 0 | 1/2 | 3 |\n| Zj | | 1/2 | 0 | -1 | 1/2 | 1 | -1/2 | 1 |\n| Cj - Zj | | -1/2 | 0 | 1 | -1/2 | 0 | 3/2 | |\n\nx enters, A1 leaves.\n\n| Basis | CB | x | y | s1 | s2 | A1 | A2 | RHS |\n|---|---|---|---|---|---|---|---|---|\n| x | 0 | 1 | 0 | -2 | 1 | 2 | -1 | 2 |\n| y | 0 | 0 | 1 | 1 | -1 | -1 | 1 | 2 |\n| Zj | | 0 | 0 | 0 | 0 | 0 | 0 | 0 |\n| Cj - Zj | | 0 | 0 | 0 | 0 | 1 | 1 | |\n\nW = 0, so a feasible solution exists. **Phase II**: drop A1, A2 and use the original objective.\n\n| Basis | CB | x | y | s1 | s2 | RHS |\n|---|---|---|---|---|---|---|\n| x | 2 | 1 | 0 | -2 | 1 | 2 |\n| y | 3 | 0 | 1 | 1 | -1 | 2 |\n| Zj | | 2 | 3 | -1 | -1 | 10 |\n| Cj - Zj | | 0 | 0 | 1 | 1 | |\n\nAll Cj - Zj >= 0: optimal. x = 2, y = 2, Z = 10.\n",
+  "method": "two_phase",
+  "group": "Step-by-step checks",
+  "description": "Correct two-phase working using the Min W convention.",
+  "source": "ChatGPT",
+  "expected": "correct"
+ },
+ {
+  "label": "Graphical \u00b7 correct corner-point working",
+  "question": "Maximize Z = 3x + 2y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "Boundary lines: x + y = 4 meets the axes at (4, 0) and (0, 4); x = 2; y = 3.\nIntersection of x + y = 4 and x = 2: solving gives (2, 2).\nIntersection of x + y = 4 and y = 3: (1, 3).\nCorner points of the feasible region: (0, 0), (2, 0), (2, 2), (1, 3), (0, 3).\n\n| Corner | (x, y) | Z = 3x + 2y |\n|---|---|---|\n| O | (0, 0) | 0 |\n| A | (2, 0) | 6 |\n| B | (2, 2) | 10 |\n| C | (1, 3) | 9 |\n| D | (0, 3) | 6 |\n\nTherefore the maximum is Z = 10 at x = 2, y = 2.\n",
+  "method": "graphical",
+  "group": "Step-by-step checks",
+  "description": "Correct graphical solution.",
+  "source": "Claude",
+  "expected": "correct"
+ },
+ {
+  "label": "Graphical \u00b7 wrong intersection and intercept",
+  "question": "Maximize Z = 3x + 2y subject to x + y <= 4, x <= 2, y <= 3, x, y >= 0",
+  "answer": "Boundary lines: x + y = 4 meets the axes at (4, 0) and (0, 5); x = 2; y = 3.\nIntersection of x + y = 4 and x = 2: (2, 3).\nCorner points: (0, 0), (2, 0), (2, 3), (1, 3), (0, 3).\nAt (0,0): Z = 0. At (2,0): Z = 6. At (2,3): Z = 3(2) + 2(3) = 12. At (1,3): Z = 9. At (0,3): Z = 6.\nTherefore x = 2, y = 3, Z = 12.\n",
+  "method": "graphical",
+  "group": "Step-by-step checks",
+  "description": "Contains mistakes: wrong intercept, wrong intersection, so the wrong corner is chosen.",
+  "source": "Gemini",
+  "expected": "invalid"
+ },
+ {
+  "label": "Transportation \u00b7 VAM + MODI, correct",
+  "question": "       D1  D2  D3  D4  Supply\nS1     19  30  50  10   7\nS2     70  30  40  60   9\nS3     40   8  70  20  18\nDemand  5   8   7  14",
+  "answer": "Using Vogel's Approximation Method the initial cost is 779.\nAfter one MODI iteration: S1 -> D1 = 5, S1 -> D4 = 2, S2 -> D2 = 2, S2 -> D3 = 7, S3 -> D2 = 6, S3 -> D4 = 12.\nMinimum total cost = 743.",
+  "method": "transportation",
+  "group": "Transportation and assignment",
+  "description": "Correct.",
+  "source": "ChatGPT",
+  "expected": "correct"
+ },
+ {
+  "label": "Transportation \u00b7 stops at the VAM solution",
+  "question": "       D1  D2  D3  D4  Supply\nS1     19  30  50  10   7\nS2     70  30  40  60   9\nS3     40   8  70  20  18\nDemand  5   8   7  14",
+  "answer": "Vogel's Approximation Method gives the initial cost 779.\nS1 -> D1 = 5, S1 -> D4 = 2, S2 -> D3 = 7, S2 -> D4 = 2, S3 -> D2 = 8, S3 -> D4 = 10.\nThis is optimal, so the minimum total cost = 779.",
+  "method": "transportation",
+  "group": "Transportation and assignment",
+  "description": "Contains a mistake: the VAM solution is not optimal (MODI would improve it).",
+  "source": "Gemini",
+  "expected": "invalid"
+ },
+ {
+  "label": "Assignment \u00b7 Hungarian method, correct",
+  "question": "     M1  M2  M3\nJ1    9  11  14\nJ2    6  15  13\nJ3   12  13   6",
+  "answer": "Row reduction:\n0 2 5\n0 9 7\n6 7 0\nColumn reduction:\n0 0 5\n0 7 7\n6 5 0\nAssignment: J1 -> M2, J2 -> M1, J3 -> M3. Minimum total cost = 23.",
+  "method": "assignment",
+  "group": "Transportation and assignment",
+  "description": "Correct.",
+  "source": "Claude",
+  "expected": "correct"
+ },
+ {
+  "label": "Assignment \u00b7 wrong row reduction and assignment",
+  "question": "     M1  M2  M3\nJ1    9  11  14\nJ2    6  15  13\nJ3   12  13   6",
+  "answer": "Row reduction:\n0 2 5\n0 8 7\n6 7 0\nAssignment: J1 -> M1, J2 -> M2, J3 -> M3. Minimum total cost = 30.",
+  "method": "assignment",
+  "group": "Transportation and assignment",
+  "description": "Contains mistakes.",
+  "source": "Other",
+  "expected": "invalid"
+ }
+]

@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MathGuard AI</title>
+<style>
+  :root {
+    --paper: #eef2f7;
+    --sheet: #fbfcfe;
+    --ink: #13213f;
+    --ink-soft: #4a5876;
+    --rule: #cfd8e6;
+    --grid: #dde4ef;
+    --cobalt: #2447c5;
+    --ok: #0e7a50;
+    --ok-bg: #e2f4eb;
+    --bad: #b8321f;
+    --bad-bg: #fbe8e4;
+    --warn: #a86a0a;
+    --warn-bg: #fbf0d9;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --math: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--ink); font: 16px/1.55 var(--sans);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 20px 64px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 22px 0 8px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand svg { width: 34px; height: 34px; }
+  .brand b { font: 700 24px/1 var(--serif); letter-spacing: -0.01em; }
+  .brand span { color: var(--ink-soft); font-size: 14px; display: block; margin-top: 3px; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { background: var(--sheet); border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--ink-soft); }
+  .chip i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 7px; }
+  .chip i.off { background: #9aa6bd; }
+
+  h1 { font: 600 clamp(26px, 4vw, 38px)/1.15 var(--serif); letter-spacing: -0.015em; margin: 26px 0 6px; max-width: 26ch; }
+  .lede { color: var(--ink-soft); margin: 0 0 26px; max-width: 70ch; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: 22px; align-items: start; }
+  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+
+  .sheet { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; box-shadow: 0 1px 0 var(--rule); }
+  .sheet + .sheet { margin-top: 18px; }
+  h2 { font: 600 19px/1.25 var(--serif); margin: 0 0 12px; }
+  h3 { font: 600 15px/1.3 var(--sans); margin: 0 0 8px; }
+  h4 { font: 600 14px/1.3 var(--sans); margin: 14px 0 6px; color: var(--ink-soft); }
+
+  label.f { display: block; font-weight: 600; font-size: 14px; margin: 14px 0 6px; }
+  label.f:first-of-type { margin-top: 0; }
+  textarea, select, input[type=text] {
+    width: 100%; font: 15px/1.5 var(--math); color: var(--ink); background: #fff;
+    border: 1px solid #b9c5d9; border-radius: 4px; padding: 10px 12px;
+  }
+  textarea { resize: vertical; min-height: 120px; }
+  textarea:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible, .filebtn:focus-within {
+    outline: 3px solid var(--cobalt); outline-offset: 1px;
+  }
+  select { font-family: var(--sans); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 480px) { .two { grid-template-columns: 1fr; } }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .hint { color: var(--ink-soft); font-size: 13px; margin: 6px 0 0; }
+
+  button, .filebtn {
+    font: 600 14px/1 var(--sans); border-radius: 4px; padding: 11px 16px; cursor: pointer;
+    border: 1px solid #9fb0cc; background: #fff; color: var(--ink);
+  }
+  button:hover, .filebtn:hover { background: #f1f5fb; }
+  button.primary { background: var(--ink); color: #fff; border-color: var(--ink); padding: 13px 22px; font-size: 15px; }
+  button.primary:hover { background: #1d3160; }
+  button:disabled { opacity: .6; cursor: progress; }
+  .filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .filebtn { position: relative; display: inline-block; }
+
+  details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+  .doc { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed var(--rule); }
+
+  /* ---- report ---- */
+  .empty { color: var(--ink-soft); padding: 8px 0; }
+  .empty ol { margin: 10px 0 0; padding-left: 20px; }
+  .verdict { border-radius: 6px; padding: 16px 18px; border: 2px solid; }
+  .verdict.verified { border-color: var(--ok); background: var(--ok-bg); }
+  .verdict.incorrect, .verdict.incorrect_working { border-color: var(--bad); background: var(--bad-bg); }
+  .verdict.partially_verified, .verdict.unverifiable { border-color: var(--warn); background: var(--warn-bg); }
+  .verdict .word { font: 700 clamp(24px, 4vw, 34px)/1.1 var(--serif); letter-spacing: -0.02em; }
+  .verdict.verified .word { color: var(--ok); }
+  .verdict.incorrect .word, .verdict.incorrect_working .word { color: var(--bad); }
+  .verdict.partially_verified .word, .verdict.unverifiable .word { color: var(--warn); }
+  .verdict .sub { margin-top: 6px; font-size: 14px; color: var(--ink-soft); }
+  .counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .count { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--rule); border-radius: 999px; padding: 3px 11px; font-size: 13px; font-weight: 600; }
+  .count b { font-variant-numeric: tabular-nums; }
+  .firsterr { margin-top: 10px; font-size: 14px; }
+
+  .mark { width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 12px; font-weight: 700; color: #fff; flex: none; }
+  .mark.correct, .mark.ok { background: var(--ok); }
+  .mark.incorrect, .mark.bad { background: var(--bad); }
+  .mark.consequential, .mark.deviation, .mark.unverifiable, .mark.incomplete { background: var(--warn); }
+  .mark.info { background: #7f8fae; }
+
+  .steps { margin-top: 6px; }
+  .sgroup { margin-top: 14px; }
+  .sgroup > h4 { margin: 0 0 6px; color: var(--ink); font-size: 14px; border-bottom: 1px solid var(--rule); padding-bottom: 4px; }
+  .step { display: grid; grid-template-columns: 22px 1fr; gap: 8px; padding: 7px 0 7px 10px; border-left: 3px solid transparent; font-size: 14.5px; }
+  .step.incorrect { border-left-color: var(--bad); background: linear-gradient(90deg, var(--bad-bg), transparent 70%); }
+  .step.consequential, .step.deviation, .step.unverifiable, .step.incomplete { border-left-color: var(--warn); }
+  .step .t { font-weight: 600; }
+  .step .msg { color: var(--ink); }
+  .step .meta { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+  .step .vals { font-family: var(--math); font-size: 13px; margin-top: 3px; }
+  .step .vals .ai { color: var(--bad); } .step .vals .cv { color: var(--ok); }
+  .tag { display: inline-block; font: 600 11.5px/1 var(--sans); border-radius: 3px; padding: 3px 6px; margin-right: 6px; border: 1px solid var(--rule); background: #fff; color: var(--ink-soft); }
+  .tag.code { border-color: var(--bad); color: var(--bad); }
+  .tag.amber { border-color: var(--warn); color: var(--warn); }
+  .note { font-size: 13px; color: var(--ink-soft); margin-top: 4px; border-left: 2px solid var(--rule); padding-left: 8px; }
+
+  .cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  @media (max-width: 560px) { .cmp { grid-template-columns: 1fr; } }
+  .cmp > div { border: 1px solid var(--rule); border-radius: 4px; padding: 10px 12px; background: #fff; }
+  .cmp .tg { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+  .cmp .tg.ai { color: var(--bad); font-weight: 600; } .cmp .tg.tr { color: var(--ok); font-weight: 600; }
+  .cmp p { margin: 0; font: 14px/1.5 var(--math); }
+
+  .plotbox { margin-top: 18px; }
+  canvas { width: 100%; display: block; background: #fff; border: 1px solid var(--rule); border-radius: 4px; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 12px; height: 12px; display: inline-block; }
+  .sw.reg { background: rgba(14,122,80,.18); border: 1px solid var(--ok); }
+  .sw.tr { background: var(--ok); border-radius: 50%; }
+  .sw.ai { background: var(--bad); transform: rotate(45deg) scale(.8); clip-path: polygon(40% 0, 60% 0, 60% 40%, 100% 40%, 100% 60%, 60% 60%, 60% 100%, 40% 100%, 40% 60%, 0 60%, 0 40%, 40% 40%); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 6px; }
+  th { text-align: left; font-weight: 600; color: var(--ink-soft); font-size: 12.5px; padding: 5px 7px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  td { padding: 5px 7px; border-bottom: 1px solid var(--grid); font-family: var(--math); font-size: 13px; }
+  td.ok { color: var(--ok); font-weight: 700; } td.no { color: var(--bad); font-weight: 700; }
+  table.tab td, table.tab th { text-align: center; }
+  table.tab td:first-child, table.tab th:first-child { text-align: left; }
+  table.tab tr.eval td { background: #f4f7fb; }
+  td.cbad { background: var(--bad-bg); color: var(--bad); font-weight: 700; }
+  td.cok { color: var(--ink); }
+  td.piv { outline: 2px solid var(--cobalt); outline-offset: -2px; font-weight: 700; }
+  td.enter, th.enter { background: #e8edfb; }
+  tr.leave td { background: #f6efe0; }
+  td.cov { background: #e9eef8; }
+  td.zero { font-weight: 700; color: var(--cobalt); }
+  td.assigned { background: var(--ok-bg); font-weight: 700; color: var(--ok); }
+  .scroll { overflow-x: auto; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0 16px; }
+  @media (max-width: 760px) { .pair { grid-template-columns: 1fr; } }
+  .pair > div { border: 1px solid var(--rule); border-radius: 4px; padding: 8px 10px; background: #fff; min-width: 0; }
+  .pair .cap { font-size: 12.5px; font-weight: 600; margin-bottom: 2px; }
+  .pair .cap.ai { color: var(--bad); } .pair .cap.mg { color: var(--ok); }
+  .itbox { border: 1px solid var(--rule); border-radius: 4px; background: #fff; padding: 10px 12px; margin: 10px 0; }
+  .itbox p { margin: 6px 0 0; font-size: 14px; }
+
+  .bars { display: grid; gap: 6px; margin-top: 6px; }
+  .bar { display: grid; grid-template-columns: 190px 1fr 44px; gap: 10px; align-items: center; font-size: 13px; }
+  .bar .track { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--cobalt); }
+  @media (max-width: 480px) { .bar { grid-template-columns: 120px 1fr 40px; } }
+
+  .ref { border-left: 3px solid var(--cobalt); padding: 4px 0 4px 12px; margin: 10px 0; font-size: 14px; }
+  .ref small { color: var(--ink-soft); display: block; margin-bottom: 2px; }
+  .gen { border-left: 3px solid #9aa6bd; padding: 4px 0 4px 12px; margin: 8px 0; font-size: 14px; }
+  .gen small { color: var(--ink-soft); display: block; }
+  .err { background: var(--bad-bg); border: 1px solid var(--bad); color: var(--bad); padding: 12px 14px; border-radius: 4px; font-size: 15px; }
+  .err small { display: block; color: var(--ink); margin-top: 4px; font-family: var(--math); }
+  .parsed { font: 14px/1.6 var(--math); margin: 8px 0 0; }
+  .warn { color: var(--warn); font-size: 13px; margin-top: 6px; }
+  .sec { margin-top: 24px; }
+  .sec > h3 { font: 600 17px/1.3 var(--serif); border-bottom: 1px solid var(--rule); padding-bottom: 5px; }
+  .explain { margin: 6px 0 0; padding-left: 20px; font-size: 14px; }
+  .explain li { margin: 4px 0; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .tabs button { padding: 7px 12px; font-size: 13px; }
+  .tabs button[aria-selected=true] { background: var(--ink); color: #fff; border-color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 8.5v11c0 9.5-6.3 15.6-15 18-8.7-2.4-15-8.5-15-18v-11z" fill="#13213f"/><path d="M11 25 17 13l5 9 3-5 4 8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><b>MathGuard AI</b><span>Independent checker for AI-generated optimisation solutions</span></div>
+    </div>
+    <div class="chips">
+      <span class="chip" id="chipSolver"><i class="off"></i>Solver: loading</span>
+      <span class="chip" id="chipRef"><i class="off"></i>Textbook: none</span>
+    </div>
+  </header>
+
+  <h1>Check every step of an AI's optimisation solution.</h1>
+  <p class="lede">MathGuard solves the problem itself with textbook algorithms (graphical, simplex, Big M, two-phase, transportation, assignment), then compares the AI's working step by step: tableaus, ratios, pivots, row operations, corner points and the final answer. Your textbook, if you upload one, supplies the supporting passages.</p>
+
+  <div class="layout">
+    <section>
+      <form class="sheet" id="form" autocomplete="off">
+        <h2>Case to check</h2>
+        <label class="f" for="example">Try a sample</label>
+        <select id="example"><option value="">Choose a sample question and AI answer…</option></select>
+        <p class="hint" id="exampleHint"></p>
+
+        <div class="two" style="margin-top:14px">
+          <div>
+            <label class="f" for="method">Optimisation method</label>
+            <select id="method"></select>
+          </div>
+          <div>
+            <label class="f" for="source">AI that wrote the answer</label>
+            <select id="source"></select>
+          </div>
+        </div>
+        <p class="hint" id="methodHint">The source is only recorded with the report; MathGuard does not connect to these services.</p>
+
+        <label class="f" for="question">Optimisation problem</label>
+        <textarea id="question" rows="6" placeholder="Maximize Z = 3x + 5y&#10;subject to&#10;  x + y <= 4&#10;  x <= 2&#10;  y <= 3&#10;  x, y >= 0"></textarea>
+
+        <label class="f" for="answer">AI-generated solution (paste the full working)</label>
+        <textarea id="answer" rows="10" placeholder="Paste everything the AI wrote: standard form, every tableau (Markdown, LaTeX or plain text tables), entering / leaving variables, ratios, row operations and the final answer."></textarea>
+        <div class="row">
+          <label class="filebtn">Load answer from file<input type="file" id="answerFile" accept=".txt,.md,.pdf"></label>
+          <span class="hint" style="margin:0">.txt, .md or .pdf</span>
+        </div>
+
+        <div class="row" style="margin-top:20px">
+          <button class="primary" id="go" type="submit">Verify the AI's solution</button>
+          <button type="button" id="solveOnly">Show MathGuard's solution only</button>
+          <button type="button" id="clear">Clear</button>
+        </div>
+      </form>
+
+      <div class="sheet">
+        <h2>Reference textbook</h2>
+        <p class="hint" style="margin-top:0">Upload a textbook (PDF or text). It is used as a methodological reference: MathGuard retrieves the passages about the selected method and about each mistake it finds. The numbers themselves always come from MathGuard's own algorithms. Page numbers are shown only when they come from your file.</p>
+        <div class="row">
+          <label class="filebtn">Upload textbook<input type="file" id="refFile" accept=".pdf,.txt,.md"></label>
+          <button type="button" id="refClear">Remove all</button>
+        </div>
+        <div id="refList" style="margin-top:10px"></div>
+        <p class="hint" id="refMsg" role="status"></p>
+      </div>
+    </section>
+
+    <section>
+      <div class="sheet" id="report" aria-live="polite">
+        <h2>Verification report</h2>
+        <div class="empty" id="empty">
+          Nothing checked yet.
+          <ol>
+            <li>Paste the problem (or pick a sample) and choose the method.</li>
+            <li>Paste the AI's complete solution, including its working.</li>
+            <li>Select <b>Verify the AI's solution</b>. Ctrl + Enter works too.</li>
+          </ol>
+        </div>
+        <div id="out" hidden></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else e.setAttribute(k, v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
+  return e;
+}
+const S = (x) => (x == null ? "" : typeof x === "object" ? (x.s ?? (x.v != null ? String(x.v) : "")) : String(x));
+const num = (x) => (Math.abs(x - Math.round(x)) < 1e-9 ? String(Math.round(x)) : String(+x.toFixed(4)));
+const STATUS = {
+  correct: { mark: "✓", word: "Correct" }, incorrect: { mark: "✕", word: "Incorrect" },
+  consequential: { mark: "↳", word: "Follows an earlier error" }, deviation: { mark: "~", word: "Valid, non-textbook choice" },
+  unverifiable: { mark: "?", word: "Unverifiable" }, incomplete: { mark: "…", word: "Incomplete working" },
+};
+const VERDICT = {
+  verified: "Verified", partially_verified: "Partially verified", incorrect_working: "Working has errors",
+  incorrect: "Incorrect", unverifiable: "Cannot verify",
+};
+const PLACEHOLDER = {
+  lp: "Maximize Z = 3x + 5y\nsubject to\n  x + y <= 4\n  x <= 2\n  y <= 3\n  x, y >= 0",
+  transport: "       D1  D2  D3  D4  Supply\nS1     19  30  50  10   7\nS2     70  30  40  60   9\nS3     40   8  70  20  18\nDemand  5   8   7  14",
+  assignment: "     M1  M2  M3\nJ1    9  11  14\nJ2    6  15  13\nJ3   12  13   6",
+};
+let examples = [], methods = [], lastResult = null;
+
+/* ---------- status ---------- */
+function setChip(el, ok, text) { el.replaceChildren(h("i", { class: ok ? "" : "off" }), text); }
+async function loadStatus() {
+  try {
+    const r = await (await fetch("/api/health")).json();
+    setChip($("#chipSolver"), true, "Exact textbook solvers ready");
+    renderRef(r.reference);
+  } catch { setChip($("#chipSolver"), false, "Server not reachable"); }
+}
+function renderRef(st) {
+  setChip($("#chipRef"), st.loaded, st.loaded ? `Textbook: ${st.documents.length} loaded` : "Textbook: none");
+  const box = $("#refList"); box.replaceChildren();
+  st.documents.forEach((d) => box.append(h("div", { class: "doc" }, h("span", { text: d.name }), h("span", { text: `${d.pages} pages · ${d.chunks} passages` }))));
+}
+async function loadMethods() {
+  const j = await (await fetch("/api/methods")).json();
+  methods = j.methods;
+  const sel = $("#method");
+  methods.forEach((m) => sel.append(h("option", { value: m.id, text: m.name })));
+  const src = $("#source");
+  j.ai_sources.forEach((s) => src.append(h("option", { value: s, text: s })));
+  src.value = "Unknown";
+  sel.addEventListener("change", () => {
+    const m = methods.find((x) => x.id === sel.value);
+    $("#question").placeholder = PLACEHOLDER[m ? m.kind : "lp"];
+  });
+}
+
+/* ---------- examples ---------- */
+async function loadExamples() {
+  examples = await (await fetch("/api/examples")).json();
+  const sel = $("#example"); const groups = {};
+  examples.forEach((e, i) => {
+    const g = e.group || "Samples";
+    if (!groups[g]) { groups[g] = h("optgroup", { label: g }); sel.append(groups[g]); }
+    groups[g].append(h("option", { value: i, text: e.label }));
+  });
+}
+$("#example").addEventListener("change", (ev) => {
+  const e = examples[ev.target.value];
+  if (!e) { $("#exampleHint").textContent = ""; return; }
+  $("#question").value = e.question; $("#answer").value = e.answer;
+  if (e.method && [...$("#method").options].some((o) => o.value === e.method)) $("#method").value = e.method;
+  else $("#method").value = "auto";
+  if (e.source) $("#source").value = e.source;
+  $("#exampleHint").textContent = e.description || (e.expected === "correct" ? "This sample answer is correct." : "This sample answer contains a mistake.");
+});
+
+/* ---------- files ---------- */
+$("#answerFile").addEventListener("change", async (ev) => {
+  const f = ev.target.files[0]; if (!f) return;
+  const fd = new FormData(); fd.append("file", f);
+  const j = await (await fetch("/api/extract", { method: "POST", body: fd })).json();
+  if (j.error) showError(j.error); else $("#answer").value = j.text;
+  ev.target.value = "";
+});
+$("#refFile").addEventListener("change", async (ev) => {
+  const f = ev.target.files[0]; if (!f) return;
+  $("#refMsg").textContent = `Indexing ${f.name}…`;
+  const fd = new FormData(); fd.append("file", f);
+  const j = await (await fetch("/api/reference/upload", { method: "POST", body: fd })).json();
+  if (j.error) $("#refMsg").textContent = j.error;
+  else { $("#refMsg").textContent = `Added ${j.added.name}: ${j.added.chunks} passages indexed.`; renderRef(j); }
+  ev.target.value = "";
+});
+$("#refClear").addEventListener("click", async () => {
+  renderRef(await (await fetch("/api/reference", { method: "DELETE" })).json());
+  $("#refMsg").textContent = "Textbooks removed.";
+});
+
+/* ---------- submit ---------- */
+function showError(msg, hint) {
+  $("#empty").hidden = true; const out = $("#out"); out.hidden = false;
+  out.replaceChildren(h("div", { class: "err", role: "alert" }, msg, hint ? h("small", { text: hint }) : null));
+}
+$("#clear").addEventListener("click", () => {
+  ["#question", "#answer"].forEach((s) => ($(s).value = "")); $("#example").value = ""; $("#exampleHint").textContent = "";
+  $("#out").hidden = true; $("#empty").hidden = false; lastResult = null;
+});
+async function post(url, body, btn, busy) {
+  const label = btn.textContent; btn.disabled = true; btn.textContent = busy;
+  try {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) showError(j.error || "Something went wrong.", j.hint); else return j;
+  } catch { showError("Could not reach the MathGuard server. Check that it is running and try again."); }
+  finally { btn.disabled = false; btn.textContent = label; }
+}
+$("#form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const j = await post("/api/analyze", { question: $("#question").value, answer: $("#answer").value, method: $("#method").value, ai_source: $("#source").value }, $("#go"), "Verifying…");
+  if (j) render(j);
+});
+$("#solveOnly").addEventListener("click", async () => {
+  const j = await post("/api/solve", { question: $("#question").value, method: $("#method").value }, $("#solveOnly"), "Solving…");
+  if (j) renderSolveOnly(j);
+});
+document.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") $("#form").requestSubmit(); });
+
+/* ---------- report ---------- */
+function section(title, ...kids) { return h("div", { class: "sec" }, h("h3", { text: title }), ...kids); }
+
+function render(j) {
+  lastResult = j;
+  $("#empty").hidden = true;
+  const out = $("#out"); out.hidden = false; out.replaceChildren();
+  const rep = j.report, sm = rep.summary;
+
+  // 1. verdict
+  const counts = h("div", { class: "counts" },
+    h("span", { class: "count" }, h("span", { class: "mark correct", text: "✓" }), h("b", { text: sm.correct_steps }), "correct"),
+    h("span", { class: "count" }, h("span", { class: "mark incorrect", text: "✕" }), h("b", { text: sm.incorrect_steps }), "incorrect"),
+    h("span", { class: "count" }, h("span", { class: "mark unverifiable", text: "?" }), h("b", { text: sm.unverifiable_steps }), "unverifiable / incomplete"),
+    sm.dependent_steps ? h("span", { class: "count" }, h("span", { class: "mark consequential", text: "↳" }), h("b", { text: sm.dependent_steps }), "follow an earlier error") : null,
+    sm.deviations ? h("span", { class: "count" }, h("span", { class: "mark deviation", text: "~" }), h("b", { text: sm.deviations }), "valid non-textbook choice") : null);
+  const sub = h("div", { class: "sub" }, `${j.method_name}`, j.ai_source && j.ai_source !== "Unknown" ? ` · answer from ${j.ai_source}` : "",
+    j.method_note ? h("div", { text: j.method_note }) : null);
+  const v = h("div", { class: "verdict " + sm.verdict }, h("div", { class: "word", text: VERDICT[sm.verdict] }),
+    h("div", { style: "font-weight:600;margin-top:4px", text: sm.verdict_text }), sub, counts);
+  if (sm.first_error) v.append(h("div", { class: "firsterr" }, h("b", { text: "First mistake: " }), `${sm.first_error.group} · ${sm.first_error.title}`, sm.first_error.code ? ` (${sm.first_error.code})` : ""));
+  out.append(v);
+
+  // 2. answer vs MathGuard
+  out.append(h("div", { class: "cmp" },
+    h("div", {}, h("div", { class: "tg ai", text: "What the AI concluded" }), h("p", { text: (j.claim && j.claim.text) || "" })),
+    h("div", {}, h("div", { class: "tg tr", text: "MathGuard's independent result" }), h("p", { text: (j.truth && j.truth.text) || "" }))));
+
+  // 3. steps
+  const stepsBox = h("div", { class: "steps" });
+  let cur = null, gbox = null;
+  rep.steps.forEach((s) => {
+    if (s.group !== cur) { cur = s.group; gbox = h("div", { class: "sgroup" }, h("h4", { text: s.group })); stepsBox.append(gbox); }
+    const st = STATUS[s.status] || STATUS.unverifiable;
+    const meta = [];
+    if (s.code) meta.push(h("span", { class: "tag " + (s.status === "incorrect" ? "code" : "amber"), text: `${s.code} · ${s.category}` }));
+    if (s.kind_text) meta.push(h("span", { class: "tag", text: s.kind_text }));
+    if (s.status !== "correct" && s.status !== "incorrect") meta.push(h("span", { class: "tag amber", text: st.word }));
+    const vals = s.status !== "correct" && (s.ai_value != null || s.correct_value != null) ? h("div", { class: "vals" },
+      s.ai_value != null ? h("span", { class: "ai", text: `AI: ${s.ai_value}` }) : null, s.ai_value != null && s.correct_value != null ? "   " : null,
+      s.correct_value != null ? h("span", { class: "cv", text: `Correct: ${s.correct_value}` }) : null) : null;
+    const where = [s.row ? `row ${s.row}` : null, s.column ? `column ${s.column}` : null].filter(Boolean).join(", ");
+    gbox.append(h("div", { class: "step " + s.status },
+      h("span", { class: "mark " + s.status, text: st.mark, "aria-label": st.word, title: st.word }),
+      h("div", {}, h("div", {}, h("span", { class: "t", text: s.title }), where ? h("span", { class: "meta", text: `  (${where})` }) : null),
+        s.message ? h("div", { class: "msg", text: s.message }) : null, vals,
+        meta.length ? h("div", { class: "meta" }, ...meta) : null,
+        s.consequence && s.status !== "incorrect" ? h("div", { class: "meta", text: `Depends on the earlier error in: ${s.consequence}` }) : null,
+        s.status === "incorrect" && s.note ? h("div", { class: "note" }, h("b", { text: "General method note (MathGuard): " }), s.note) : null)));
+  });
+  out.append(section("Step-by-step comparison", stepsBox));
+  if (rep.notes && rep.notes.length) stepsBox.append(h("details", { class: "sgroup" }, h("summary", { text: "How the answer was read" }), h("ul", { class: "explain" }, rep.notes.map((n) => h("li", { text: n })))));
+
+  // 4. error classification table
+  const errs = rep.steps.filter((s) => s.status === "incorrect");
+  if (errs.length) {
+    const rows = errs.map((s) => h("tr", {}, h("td", { text: s.code || "" }), h("td", { style: "font-family:var(--sans)", text: s.category || s.title }),
+      h("td", { style: "font-family:var(--sans)", text: s.group }), h("td", { text: [s.row ? "row " + s.row : "", s.column || ""].filter(Boolean).join(" / ") }),
+      h("td", { class: "no", text: s.ai_value ?? "" }), h("td", { class: "ok", text: s.correct_value ?? "" })));
+    out.append(section("Error classification", h("div", { class: "scroll" }, h("table", {},
+      h("thead", {}, h("tr", {}, ["Code", "Category", "Where", "Row / column", "AI value", "Correct value"].map((t) => h("th", { text: t })))),
+      h("tbody", {}, rows)))));
+  }
+
+  // 5. tableau comparison
+  if (rep.tableaus && rep.tableaus.length) {
+    const box = h("div");
+    rep.tableaus.forEach((p) => box.append(pairView(p)));
+    out.append(section("AI tableaus next to MathGuard's", h("p", { class: "hint", text: "Each AI tableau is compared with what correctly follows from the AI's own previous tableau and pivot choice. Red cells differ." }), box));
+  }
+
+  // 6. MathGuard's own solution
+  out.append(section("MathGuard's independently derived solution", solutionView(j.solution, j)));
+
+  // 7. textbook
+  out.append(section("Textbook support", textbookView(j)));
+
+  // 8. cross-checks + ML
+  const cc = h("ul", { class: "explain" });
+  if (j.cross_check) cc.append(h("li", {}, h("b", { text: "SciPy cross-check (secondary): " }), j.cross_check.note || ""));
+  if (j.consistency) cc.append(h("li", { text: j.consistency.method_matches_general_solver ? "The selected method and MathGuard's general two-phase solver agree on the optimum." : "Warning: the selected method and the general solver disagree. Please report this problem." }));
+  out.append(section("Independent cross-checks", cc));
+  if (j.ml) {
+    const pe = Object.entries(j.ml.probabilities).sort((a, b) => b[1] - a[1]);
+    const bars = h("div", { class: "bars" });
+    pe.forEach(([k, p]) => bars.append(h("div", { class: "bar" }, h("span", { text: k.replace(/_/g, " ") }), h("div", { class: "track" }, h("div", { class: "fill", style: `width:${(p * 100).toFixed(1)}%` })), h("span", { text: Math.round(p * 100) + "%" }))));
+    out.append(h("details", { class: "sec" }, h("summary", { text: `Experimental ML opinion: ${j.ml.prediction.replace(/_/g, " ")} (${j.ml.agrees ? "agrees" : "disagrees"} with the verifier)` }),
+      h("p", { class: "hint", text: j.ml.note }), bars));
+  }
+
+  // 9. how the question was read
+  const p = j.problem;
+  if (p) {
+    const det = h("details", { class: "sec" }, h("summary", { text: "How MathGuard read the question" }),
+      h("div", { class: "parsed" }, p.objective, h("br"), ...p.constraints.flatMap((c) => [c, h("br")]), p.variables.join(", ") + " ≥ 0"));
+    (p.warnings || []).forEach((w) => det.append(h("div", { class: "warn", text: w })));
+    out.append(det);
+  }
+  out.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderSolveOnly(j) {
+  lastResult = j;
+  $("#empty").hidden = true;
+  const out = $("#out"); out.hidden = false; out.replaceChildren();
+  out.append(h("div", { class: "verdict verified" }, h("div", { class: "word", text: j.method_name }), h("div", { class: "sub", text: j.method_note || "MathGuard's own step-by-step solution (no AI answer checked)." })));
+  out.append(section("MathGuard's independently derived solution", solutionView(j.solution, j)));
+}
+
+/* ---------- tableau pair ---------- */
+function pairView(p) {
+  const cols = p.columns;
+  const aiT = h("table", { class: "tab" }, h("thead", {}, h("tr", {}, h("th", { text: "Basis" }), h("th", { text: "CB" }), cols.map((c) => h("th", { text: c })), h("th", { text: "RHS" }))));
+  const tb = h("tbody");
+  p.ai_rows.forEach((r) => tb.append(h("tr", {}, h("td", { text: r.basis }), h("td", { text: r.cb }),
+    r.cells.map((c) => h("td", { class: c.st === "bad" ? "cbad" : "", title: c.st === "bad" ? `should be ${c.exp}` : null, text: c.ai })),
+    h("td", { class: r.rhs.st === "bad" ? "cbad" : "", title: r.rhs.st === "bad" ? `should be ${r.rhs.exp}` : null, text: r.rhs.ai }))));
+  if (Object.keys(p.ai_delta || {}).length) tb.append(h("tr", { class: "eval" }, h("td", { text: "Cj − Zj" }), h("td"), cols.map((c) => h("td", { text: p.ai_delta[c] ?? "" })), h("td")));
+  aiT.append(tb);
+  let mg = h("p", { class: "hint", text: "Not computable (the previous tableau could not be read)." });
+  if (p.expected) {
+    const e = p.expected;
+    mg = h("table", { class: "tab" }, h("thead", {}, h("tr", {}, h("th", { text: "Basis" }), h("th", { text: "CB" }), cols.map((c) => h("th", { text: c })), h("th", { text: "RHS" }))));
+    const b2 = h("tbody");
+    e.basis.forEach((bn, i) => b2.append(h("tr", {}, h("td", { text: bn }), h("td", { text: e.cb[i] }), e.rows[i].map((x) => h("td", { text: x })), h("td", { text: e.rhs[i] }))));
+    if (e.delta) b2.append(h("tr", { class: "eval" }, h("td", { text: "Cj − Zj" }), h("td"), e.delta.map((x) => h("td", { text: x })), h("td")));
+    mg.append(b2);
+  }
+  return h("div", {}, h("h4", { text: p.label + (p.upstream_error ? ` (built on the error in ${p.upstream_error})` : "") }),
+    h("div", { class: "pair" }, h("div", { class: "scroll" }, h("div", { class: "cap ai", text: "AI's tableau" }), aiT),
+      h("div", { class: "scroll" }, h("div", { class: "cap mg", text: "What it should be" }), mg)));
+}
+
+/* ---------- MathGuard solution views ---------- */
+function solutionView(sol, j) {
+  if (!sol) return h("p", { text: "No solution." });
+  if (sol.method === "graphical") return graphicalView(sol, j);
+  if (sol.method === "transportation") return transportView(sol);
+  if (sol.method === "assignment") return assignmentView(sol);
+  return tableauMethodView(sol);
+}
+function explainList(items) { return h("ol", { class: "explain" }, items.map((t) => h("li", { text: t }))); }
+
+function graphicalView(g, j) {
+  const box = h("div");
+  box.append(h("p", { class: "hint", text: `${g.objective}. Status: ${g.status.replace("_", " ")}; feasible region ${g.region}.` }));
+  box.append(h("h4", { text: "1. Boundary lines and intercepts" }), h("div", { class: "scroll" }, h("table", {},
+    h("thead", {}, h("tr", {}, ["Constraint", "Boundary line", "x-intercept", "y-intercept", "Note"].map((t) => h("th", { text: t })))),
+    h("tbody", {}, g.boundary_lines.map((l) => h("tr", {}, h("td", { text: l.constraint }), h("td", { text: l.equation }),
+      h("td", { text: l.x_intercept ? `(${S(l.x_intercept[0])}, ${S(l.x_intercept[1])})` : "–" }),
+      h("td", { text: l.y_intercept ? `(${S(l.y_intercept[0])}, ${S(l.y_intercept[1])})` : "–" }), h("td", { style: "font-family:var(--sans)", text: l.note })))))));
+  const its = g.intersections.filter((i) => i.point);
+  box.append(h("h4", { text: "2. Intersection points and feasibility" }), h("div", { class: "scroll" }, h("table", {},
+    h("thead", {}, h("tr", {}, ["Lines", "Point", "Feasible?", "Violates"].map((t) => h("th", { text: t })))),
+    h("tbody", {}, its.map((i) => h("tr", {}, h("td", { text: i.equations.join("  &  ") }), h("td", { text: `(${S(i.point[0])}, ${S(i.point[1])})` }),
+      h("td", { class: i.feasible ? "ok" : "no", text: i.feasible ? "yes" : "no" }), h("td", { text: i.violated.join(", ") })))))));
+  if (g.corners.length) box.append(h("h4", { text: "3. Corner points and objective values" }), h("div", { class: "scroll" }, h("table", {},
+    h("thead", {}, h("tr", {}, ["Corner", "Point", "Z", "Working"].map((t) => h("th", { text: t })))),
+    h("tbody", {}, g.corners.map((c) => {
+      const best = g.optimal_corners.some((p) => S(p[0]) === S(c.point[0]) && S(p[1]) === S(c.point[1]));
+      return h("tr", {}, h("td", { text: c.label + (c.degenerate ? " (degenerate)" : "") }), h("td", { text: `(${S(c.point[0])}, ${S(c.point[1])})` }),
+        h("td", { class: best ? "ok" : "", text: S(c.z) }), h("td", { text: c.z_calc }));
+    })))));
+  if (j && j.plot) {
+    const cv = h("canvas", { id: "plot", role: "img", "aria-label": "Feasible region with the AI's point and the verified optimum" });
+    box.append(h("div", { class: "plotbox" }, h("h4", { text: "Feasible region" }), cv, h("div", { class: "legend" },
+      h("span", {}, h("i", { class: "sw reg" }), "Feasible region"), h("span", {}, h("i", { class: "sw tr" }), "Verified optimum"), h("span", {}, h("i", { class: "sw ai" }), "AI's point"))));
+    requestAnimationFrame(() => drawPlot(cv, j));
+  }
+  box.append(h("h4", { text: "Working" }), explainList(g.explanation));
+  return box;
+}
+
+function tableauView(s, cols) {
+  const ej = s.entering ? cols.indexOf(s.entering) : -1;
+  const lr = s.pivot ? s.pivot.row : -1;
+  const hasRatio = s.ratios && s.conclusion === "pivot";
+  const t = h("table", { class: "tab" }, h("thead", {},
+    h("tr", { class: "eval" }, h("td", { text: "Cj" }), h("td"), s.cost.map((c, j) => h("td", { class: j === ej ? "enter" : "", text: S(c) })), h("td"), hasRatio ? h("td") : null),
+    h("tr", {}, h("th", { text: "Basis" }), h("th", { text: "CB" }), cols.map((c, j) => h("th", { class: j === ej ? "enter" : "", text: c })), h("th", { text: "RHS" }), hasRatio ? h("th", { text: "Ratio" }) : null)));
+  const tb = h("tbody");
+  s.basis.forEach((bn, i) => tb.append(h("tr", { class: i === lr ? "leave" : "" }, h("td", { text: bn }), h("td", { text: S(s.cb[i]) }),
+    s.rows[i].map((x, j) => h("td", { class: (i === lr && j === ej ? "piv " : "") + (j === ej ? "enter" : ""), text: S(x) })), h("td", { text: S(s.rhs[i]) }),
+    hasRatio ? h("td", { text: s.ratios[i] ? S(s.ratios[i]) : "–" }) : null)));
+  tb.append(h("tr", { class: "eval" }, h("td", { text: "Zj" }), h("td"), s.zj.map((x) => h("td", { text: S(x) })), h("td", { text: S(s.z) }), hasRatio ? h("td") : null));
+  tb.append(h("tr", { class: "eval" }, h("td", { text: "Cj − Zj" }), h("td"), s.delta.map((x, j) => h("td", { class: j === ej ? "enter" : "", text: s.basis.includes(cols[j]) ? "0" : S(x) })), h("td"), hasRatio ? h("td") : null));
+  t.append(tb);
+  return t;
+}
+
+function tableauMethodView(r) {
+  const box = h("div");
+  box.append(h("p", { class: "hint", text: `${r.objective}. Status: ${r.status.replace("_", " ")}.` }));
+  box.append(h("h4", { text: "Standard form" }), explainList(r.standard_form.steps.concat(["Equations: " + r.standard_form.equations.join(";  ")])));
+  const ex = r.explanation.slice();
+  r.phases.forEach((ph) => {
+    if (r.phases.length > 1 || ph.name !== "Simplex") box.append(h("h4", { text: ph.name }));
+    ph.iterations.forEach((s, k) => {
+      const head = k === 0 ? "Initial tableau" : `Tableau after iteration ${k}`;
+      const lines = [];
+      if (s.conclusion === "pivot") lines.push(`Entering: ${s.entering}. Leaving: ${s.leaving}. Pivot element: ${S(s.pivot.value)}.`, "Row operations: " + s.row_ops.join("; ") + ".");
+      if (s.conclusion === "optimal") lines.push(s.notes[s.notes.length - 1]);
+      if (s.conclusion === "unbounded") lines.push(s.notes[s.notes.length - 1]);
+      s.notes.filter((n) => /Degenerate|Tie|Bland/.test(n)).forEach((n) => lines.push(n));
+      box.append(h("div", { class: "itbox" }, h("b", { text: head }), h("div", { class: "scroll" }, tableauView(s, s.columns)), ...lines.map((l) => h("p", { text: l }))));
+    });
+    if (ph.note) box.append(h("p", { class: "hint", text: ph.note }));
+  });
+  if (r.alternative) box.append(h("div", { class: "itbox" }, h("b", { text: `Alternative optimal tableau (${r.alternative.via.entering} enters, ${r.alternative.via.leaving} leaves)` }), h("div", { class: "scroll" }, tableauView(r.alternative, r.alternative.columns))));
+  if (r.solution) box.append(h("p", {}, h("b", { text: "Optimal solution: " }), Object.entries(r.solution).map(([k, v]) => `${k} = ${S(v)}`).join(", ") + `;  Z = ${S(r.value)}`));
+  box.append(h("details", {}, h("summary", { text: "Full written explanation" }), explainList(ex)));
+  return box;
+}
+
+function matrixTable(rows, cols, cellFn, extraCol, extraRow) {
+  const t = h("table", { class: "tab" }, h("thead", {}, h("tr", {}, h("th"), cols.map((c) => h("th", { text: c })), extraCol ? h("th", { text: extraCol.title }) : null)));
+  const tb = h("tbody");
+  rows.forEach((rl, i) => tb.append(h("tr", {}, h("td", { text: rl }), cols.map((_, j) => cellFn(i, j)), extraCol ? h("td", { text: extraCol.values[i] }) : null)));
+  if (extraRow) tb.append(h("tr", { class: "eval" }, h("td", { text: extraRow.title }), extraRow.values.map((v) => h("td", { text: v })), extraCol ? h("td") : null));
+  t.append(tb);
+  return h("div", { class: "scroll" }, t);
+}
+
+function transportView(t) {
+  const box = h("div");
+  box.append(h("p", { class: "hint", text: `${t.sense === "max" ? "Maximise profit" : "Minimise cost"}. Status: ${t.status.replace("_", " ")}.` }));
+  const allocCell = (A) => (i, j) => h("td", { class: A[i][j] ? "assigned" : "", text: A[i][j] == null ? S(t.costs[i][j]) : `${S(t.costs[i][j])} [${S(A[i][j]) === "0" ? "ε" : S(A[i][j])}]` });
+  box.append(h("h4", { text: "Cost matrix" }), matrixTable(t.row_labels, t.col_labels, (i, j) => h("td", { text: S(t.costs[i][j]) }), { title: "Supply", values: t.supply.map(S) }, { title: "Demand", values: t.demand.map(S) }));
+  box.append(h("h4", { text: `Initial solution: ${t.initial_method} (cost ${S(t.initial_cost)})` }), h("p", { class: "hint", text: "Cells show cost [allocation]; ε marks a degenerate zero allocation." }),
+    matrixTable(t.row_labels, t.col_labels, allocCell(t.initial_alloc)), explainList(t.initial_steps));
+  t.iterations.forEach((it, k) => {
+    const dcell = (i, j) => h("td", { class: it.alloc[i][j] != null ? "assigned" : (it.d[i][j] && it.d[i][j].v < 0 ? "cbad" : ""), text: it.alloc[i][j] != null ? `[${S(it.alloc[i][j]) === "0" ? "ε" : S(it.alloc[i][j])}]` : `d=${S(it.d[i][j])}` });
+    box.append(h("div", { class: "itbox" }, h("b", { text: `MODI iteration ${k + 1} (cost ${S(it.cost)})` }),
+      matrixTable(t.row_labels, t.col_labels, dcell, { title: "u", values: it.u.map(S) }, { title: "v", values: it.v.map(S) }),
+      h("p", { text: it.optimal ? "All dij ≥ 0: optimal." : `Enter ${t.row_labels[it.entering[0]]}–${t.col_labels[it.entering[1]]}; θ = ${S(it.theta)}; leave ${t.row_labels[it.leaving[0]]}–${t.col_labels[it.leaving[1]]}.` })));
+  });
+  box.append(h("h4", { text: `Optimal allocation (total ${S(t.optimal_cost)})` }), matrixTable(t.row_labels, t.col_labels, allocCell(t.final_alloc)));
+  box.append(h("details", {}, h("summary", { text: "Full written explanation" }), explainList(t.explanation)));
+  return box;
+}
+
+function assignmentView(a) {
+  const box = h("div");
+  box.append(h("p", { class: "hint", text: `${a.sense === "max" ? "Maximisation" : "Minimisation"}. Status: ${a.status.replace("_", " ")}.` }));
+  a.stages.forEach((st) => {
+    const L = st.lines || { rows: [], cols: [] };
+    const cell = (i, j) => h("td", { class: [L.rows.includes(i) || L.cols.includes(j) ? "cov" : "", S(st.matrix[i][j]) === "0" ? "zero" : ""].join(" "), text: S(st.matrix[i][j]) });
+    box.append(h("div", { class: "itbox" }, h("b", { text: st.name + (st.theta ? ` (θ = ${S(st.theta)})` : "") + (st.lines ? ` · ${st.lines.count} covering lines` : "") }),
+      matrixTable(a.row_labels, a.col_labels, cell, st.subtracted && st.name === "Row reduction" ? { title: "row min", values: st.subtracted.map(S) } : null,
+        st.subtracted && st.name === "Column reduction" ? { title: "col min", values: st.subtracted.map(S) } : null)));
+  });
+  const asg = new Set(a.assignment.map(([i, j]) => `${i},${j}`));
+  box.append(h("h4", { text: `Optimal assignment (total ${S(a.total)})` }), matrixTable(a.row_labels, a.col_labels, (i, j) => h("td", { class: asg.has(`${i},${j}`) ? "assigned" : "", text: S(a.costs[i][j]) })));
+  box.append(explainList(a.explanation));
+  return box;
+}
+
+/* ---------- textbook ---------- */
+function textbookView(j) {
+  const tb = j.textbook || {}; const box = h("div");
+  const cite = (r) => h("div", { class: "ref" }, h("small", { text: `${r.doc}, ${r.where || "page " + r.page}` }), r.text.length > 520 ? r.text.slice(0, 520) + "…" : r.text);
+  if (!tb.loaded) box.append(h("p", { class: "hint", text: "No textbook uploaded. The notes below are MathGuard's general algorithm explanations, not quotations from a book." }));
+  if (tb.method_passages && tb.method_passages.length) box.append(h("h4", { text: "Your textbook on this method" }), ...tb.method_passages.map(cite));
+  const gen = j.general_notes || {};
+  Object.entries(gen).forEach(([code, g]) => {
+    box.append(h("h4", { text: `${code} · ${g.title}` }));
+    (tb.by_error && tb.by_error[code] || []).forEach((r) => box.append(cite(r)));
+    box.append(h("div", { class: "gen" }, h("small", { text: "General method note (MathGuard, not from your textbook)" }), g.note));
+  });
+  if (tb.loaded && !Object.keys(gen).length && !(tb.method_passages || []).length) box.append(h("p", { class: "hint", text: "No passage in the uploaded textbook matched closely enough." }));
+  if (!box.childNodes.length) box.append(h("p", { class: "hint", text: "No errors to explain." }));
+  return box;
+}
+
+/* ---------- plot (unchanged geometry) ---------- */
+function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p; return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * p; }
+function drawPlot(cv, j) {
+  const pl = j.plot, dpr = window.devicePixelRatio || 1;
+  const W = cv.clientWidth, H = Math.round(W * 0.75);
+  cv.width = W * dpr; cv.height = H * dpr; cv.style.height = H + "px";
+  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const L = 46, R = 18, T = 16, B = 40, M = pl.max;
+  const s = Math.min((W - L - R) / M, (H - T - B) / M);
+  const X = (x) => L + x * s, Y = (y) => H - B - y * s;
+  const ink = css("--ink"), soft = css("--ink-soft"), grid = css("--grid"), ok = css("--ok"), bad = css("--bad"), cob = css("--cobalt");
+  g.clearRect(0, 0, W, H); g.font = "12px " + css("--sans");
+  const step = niceStep(M / 6);
+  g.lineWidth = 1; g.strokeStyle = grid; g.fillStyle = soft; g.textAlign = "center";
+  for (let v = 0; v <= M + 1e-9; v += step) {
+    g.beginPath(); g.moveTo(X(v), Y(0)); g.lineTo(X(v), Y(M)); g.stroke();
+    g.beginPath(); g.moveTo(X(0), Y(v)); g.lineTo(X(M), Y(v)); g.stroke();
+    g.fillText(num(v), X(v), Y(0) + 16);
+    g.textAlign = "right"; g.fillText(num(v), X(0) - 8, Y(v) + 4); g.textAlign = "center";
+  }
+  g.strokeStyle = ink; g.lineWidth = 1.5; g.beginPath(); g.moveTo(X(0), Y(M)); g.lineTo(X(0), Y(0)); g.lineTo(X(M), Y(0)); g.stroke();
+  g.fillStyle = ink; g.font = "600 13px " + css("--sans");
+  g.fillText(pl.axes[0], X(M) - 6, Y(0) + 32); g.textAlign = "left"; g.fillText(pl.axes[1], X(0) + 8, Y(M) + 10); g.textAlign = "center";
+  g.font = "11px " + css("--math"); g.lineWidth = 1.3;
+  pl.lines.forEach((ln) => { g.strokeStyle = cob; g.globalAlpha = 0.55; g.beginPath(); g.moveTo(X(ln.p1[0]), Y(ln.p1[1])); g.lineTo(X(ln.p2[0]), Y(ln.p2[1])); g.stroke(); g.globalAlpha = 1; });
+  if (pl.polygon.length >= 3) {
+    g.beginPath(); pl.polygon.forEach((p, i) => (i ? g.lineTo(X(p[0]), Y(p[1])) : g.moveTo(X(p[0]), Y(p[1])))); g.closePath();
+    g.fillStyle = "rgba(14,122,80,.18)"; g.fill(); g.strokeStyle = ok; g.lineWidth = 2; g.stroke();
+  } else { g.fillStyle = bad; g.font = "600 15px " + css("--sans"); g.fillText("No feasible region: the constraints conflict", X(M / 2), Y(M / 2)); }
+  g.fillStyle = cob; g.font = "11px " + css("--math"); g.textAlign = "left";
+  pl.lines.forEach((ln) => { const p = ln.p2[0] > ln.p1[0] ? ln.p2 : ln.p1; g.fillText(ln.label, Math.min(X(p[0]) - 4, W - R - ln.label.length * 6.6), Y(p[1]) - 6); });
+  g.textAlign = "center";
+  if (j.truth.face && j.truth.face.length >= 2 && j.truth.status === "multiple_optima") {
+    const f = j.truth.face.map((p) => [X(p[pl.axes[0]]), Y(p[pl.axes[1]])]);
+    g.strokeStyle = ok; g.lineWidth = 5; g.lineCap = "round"; g.beginPath(); g.moveTo(f[0][0], f[0][1]); f.slice(1).forEach((q) => g.lineTo(q[0], q[1])); g.stroke(); g.lineCap = "butt";
+  }
+  if (j.truth.solution) { const px = X(j.truth.solution[pl.axes[0]]), py = Y(j.truth.solution[pl.axes[1]]); g.fillStyle = ok; g.strokeStyle = "#fff"; g.lineWidth = 2; g.beginPath(); g.arc(px, py, 7, 0, 7); g.fill(); g.stroke(); }
+  if (j.claim.point) {
+    const px = X(j.claim.point[pl.axes[0]]), py = Y(j.claim.point[pl.axes[1]]), r = 8;
+    g.strokeStyle = "#fff"; g.lineWidth = 6; g.beginPath(); g.moveTo(px - r, py - r); g.lineTo(px + r, py + r); g.moveTo(px + r, py - r); g.lineTo(px - r, py + r); g.stroke();
+    g.strokeStyle = bad; g.lineWidth = 3; g.beginPath(); g.moveTo(px - r, py - r); g.lineTo(px + r, py + r); g.moveTo(px + r, py - r); g.lineTo(px - r, py + r); g.stroke();
+  }
+}
+window.addEventListener("resize", () => { const cv = $("#plot"); if (cv && lastResult && lastResult.plot) drawPlot(cv, lastResult); });
+
+loadStatus(); loadMethods().then(loadExamples);
+</script>
+</body>
+</html>
